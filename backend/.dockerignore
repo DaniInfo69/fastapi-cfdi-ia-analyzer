@@ -1,0 +1,43 @@
+# Git
+.git
+.gitignore
+
+# Python (Backend)
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+**/.venv/
+**/venv/
+**/env/
+**/.pytest_cache/
+**/tests/          # Opcional: si no quieres los tests dentro de la imagen final
+
+# Node / React (Frontend)
+**/node_modules/
+**/dist/
+**/build/
+**/.npm/
+**/npm-debug.log*
+
+# Variables de entorno y secretos (CRÍTICO para privacidad)
+**/.env
+**/.env.*
+**/auth_key*
+**/*.pem
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# IDEs y Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Datos temporales
+**/*.db
+**/*.sqlite3
+**/app/Data/       # Por si quedó algún rastro de tu proyecto anterior
