@@ -9,10 +9,10 @@ services:
     env_file:            
       - .env
 
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:5173"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+  ##frontend:
+    ##build: ./frontend
+    ##ports:
+      ##- "3000:5173"
+    ##volumes:
+      ##- ./frontend:/app
+      ##- /app/node_modules
