@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from .routers import ai_router
 
 app = FastAPI(
     title="CFDI Analyzer API",
@@ -20,6 +21,8 @@ app.add_middleware(
     allow_methods=["GET", "POST"], 
     allow_headers=["*"],
 )
+
+app.include_router(ai_router.router)
 
 @app.get("/", tags=["Health Check"])
 def root():
