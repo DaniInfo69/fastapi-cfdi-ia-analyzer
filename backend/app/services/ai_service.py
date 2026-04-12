@@ -5,7 +5,6 @@ import PyPDF2
 from openai import OpenAI
 
 class AIService:
-    # Initialize OpenAI client with environment variable
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     @staticmethod

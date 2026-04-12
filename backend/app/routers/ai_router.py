@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from typing import Optional
-from ..services.ai_service import AIService
+from ..services import AIService
 
 router = APIRouter(prefix="/api/ai", tags=["AI Fiscal Analysis"])
 
