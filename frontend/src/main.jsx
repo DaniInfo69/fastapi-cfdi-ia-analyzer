@@ -1,10 +1,13 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
+import { ThemeProvider } from '@mui/material/styles';
+import { AppTheme } from './Theme/AppTheme';
+import AnalysisPage from './Pages/AnalysisPage';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <ThemeProvider theme={AppTheme}>
+      <AnalysisPage />
+    </ThemeProvider>
   </StrictMode>,
-)
+);
