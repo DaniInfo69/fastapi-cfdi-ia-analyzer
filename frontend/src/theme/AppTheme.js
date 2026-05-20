@@ -6,7 +6,7 @@ export const getDesignTokens = (mode) => ({
   palette: {
     mode,
     primary: {
-      main: mode === 'light' ? '#159cf6' : '#1186d4', // Tu color morado original
+      main: mode === 'light' ? '#159cf6' : '#1186d4', 
     },
     background: {
       default: mode === 'light' ? '#f4f3ec' : '#121212',
@@ -20,11 +20,9 @@ export const getDesignTokens = (mode) => ({
     fontFamily: 'system-ui, "Segoe UI", Roboto, sans-serif',
   },
   components: {
-
     MuiButton: {
       variants: [
         {
-          // Cuando un botón tenga la propiedad variant="gradient", aplicará esto:
           props: { variant: 'gradient' }, 
           style: {
             borderRadius: '14px',
@@ -48,35 +46,45 @@ export const getDesignTokens = (mode) => ({
           },
         },
       ],
-
-
       styleOverrides: {
         root: {
           borderRadius: '14px',
           color: mode === 'dark' ? '#159cf6' : '#1186d4',
-          bold: true,
+          fontWeight: 'bold',
         },
       },
     },
-
     MuiPaper: {
       styleOverrides: {
         root: {
           backgroundColor: mode === 'dark' ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.85)',
-          backdropFilter: 'blur(12px)', // Transparencia tipo cristal
+          backdropFilter: 'blur(12px)', 
           borderRadius: '20px',
         },
       },
     },
-
-    MuiTextField: {
+    // Centralizamos el estilo para que aplique a TextField y a Select
+    MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          '& .MuiOutlinedInput-root': {
-            borderRadius: '12px', // Inputs un poco más redondos
-          },
+          borderRadius: '12px',
         },
       },
     },
+    // Estilos para el menú del selector
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          borderRadius: '8px',
+          margin: '4px 8px',
+          '&.Mui-selected': {
+            backgroundColor: mode === 'light' ? 'rgba(21, 156, 246, 0.15)' : 'rgba(17, 134, 212, 0.25)',
+            '&:hover': {
+              backgroundColor: mode === 'light' ? 'rgba(21, 156, 246, 0.25)' : 'rgba(17, 134, 212, 0.35)',
+            }
+          },
+        }
+      }
+    }
   },
 });

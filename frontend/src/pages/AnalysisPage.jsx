@@ -1,5 +1,9 @@
-import React, { useState, useContext } from 'react';
-import { Container, Paper, Typography, Button, TextField, Stack, Box, IconButton, Alert } from '@mui/material';
+// src/pages/AnalysisPage.jsx
+import React, { useState, useContext, useEffect } from 'react';
+import { 
+  Container, Paper, Typography, Button, TextField, Stack, 
+  Box, IconButton, Alert, FormControl, InputLabel, Select, MenuItem 
+} from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import TranslateIcon from '@mui/icons-material/Translate';
@@ -8,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { ColorModeContext } from '../App';
 import { useTheme } from '@mui/material/styles';
 import { analyzeFiscalHealth } from '../services/aiService';
+import { getFiscalRegimes } from '../services/fiscalService';
 
 const AnalysisPage = () => {
   const { t, i18n } = useTranslation();
@@ -17,10 +22,31 @@ const AnalysisPage = () => {
   // --- ESTADOS DEL FORMULARIO ---
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [fiscalRegimes, setFiscalRegimes] = useState([]);
+  const [selectedRegime, setSelectedRegime] = useState('');
+
+  const isEnglish = i18n.language === 'en';
+  // Buscamos si el régimen seleccionado en el estado requiere Acta Constitutiva
+  const isMoral = fiscalRegimes.find(r => r.id === selectedRegime)?.moral === true;
+
+  // --- CARGA DINÁMICA DESDE EL BACKEND ---
+  useEffect(() => {
+    const fetchRegimes = async () => {
+      try {
+        // 2. Usamos la función importada en lugar de axios directamente
+        const regimesData = await getFiscalRegimes(); 
+        setFiscalRegimes(regimesData);
+      } catch (error) {
+        // Aquí podrías poner una alerta visual si el backend no responde
+        console.error("No se pudieron cargar los regímenes fiscales.");
+      }
+    };
+    fetchRegimes();
+  }, []);
 
   // --- LÓGICA DE IDIOMA ---
   const toggleLanguage = () => {
-    const newLang = i18n.language === 'en' ? 'es' : 'en';
+    const newLang = isEnglish ? 'es' : 'en';
     i18n.changeLanguage(newLang);
   };
 
@@ -28,13 +54,12 @@ const AnalysisPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-    setResult(null); // Limpiamos errores o resultados anteriores
+    setResult(null);
 
-    // Extraemos todos los datos del formulario automáticamente
     const formData = new FormData(event.currentTarget);
+    formData.append('fiscal_regime', selectedRegime); 
 
     try {
-      // Llamamos a tu servicio que se conecta con FastAPI/OpenAI
       const response = await analyzeFiscalHealth(formData);
       setResult(response.data);
     } catch (error) {
@@ -48,10 +73,9 @@ const AnalysisPage = () => {
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       
-      {/* Controles superiores (Idioma y Tema) */}
       <Box display="flex" justifyContent="flex-end" gap={2} mb={2}>
         <Button startIcon={<TranslateIcon />} onClick={toggleLanguage} variant="outlined">
-          {i18n.language === 'en' ? 'Español' : 'English'}
+          {isEnglish ? 'Español' : 'English'}
         </Button>
         <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
           {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
@@ -65,6 +89,27 @@ const AnalysisPage = () => {
         
         <form onSubmit={handleSubmit}>
           <Stack spacing={3} mt={4}>
+              
+              {/* Selector Dinámico */}
+              <FormControl fullWidth required>
+                <InputLabel id="regime-select-label">
+                  {t('fiscal_regime', isEnglish ? 'Fiscal Regime' : 'Régimen Fiscal')}
+                </InputLabel>
+                <Select
+                  labelId="regime-select-label"
+                  name="fiscal_regime_select"
+                  value={selectedRegime}
+                  label={t('fiscal_regime', isEnglish ? 'Fiscal Regime' : 'Régimen Fiscal')}
+                  onChange={(e) => setSelectedRegime(e.target.value)}
+                >
+                  {fiscalRegimes.map((regime) => (
+                    <MenuItem key={regime.id} value={regime.id}>
+                      {isEnglish ? regime.en : regime.es}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
               <Button variant="outlined" component="label" startIcon={<CloudUploadIcon />}>
                 {t('upload_csf')}
                 <input name="tax_status_cert" type="file" hidden required accept=".pdf" />
@@ -75,24 +120,28 @@ const AnalysisPage = () => {
                 <input name="compliance_opinion" type="file" hidden required accept=".pdf" />
               </Button>
 
-              <Button variant="text" component="label" startIcon={<CloudUploadIcon />}>
-                {t('bylaws')}
-                <input name="bylaws" type="file" hidden accept=".pdf" />
-              </Button>
+              {isMoral && (
+                <Button variant="text" component="label" startIcon={<CloudUploadIcon />}>
+                  {t('bylaws')}
+                  <input name="bylaws" type="file" hidden accept=".pdf" />
+                </Button>
+              )}
               
-              <TextField name="employees" label={t('employees')} fullWidth />
-              <TextField name="location" label={t('location')} fullWidth />
-              <TextField name="additional_context" label={t('extra_context')} multiline rows={3} fullWidth />
+              <TextField 
+                name="general_context" 
+                label={t('general_context', isEnglish ? 'General Context (Employees, location, extra details)' : 'Contexto General (Empleados, ubicación, detalles extra)')} 
+                multiline 
+                rows={4} 
+                fullWidth 
+                placeholder={t('context_placeholder', isEnglish ? 'E.g. Company with 50 employees, located in Mexico City...' : 'Ej. Empresa con 50 empleados, ubicada en CDMX...')}
+              />
               
               <Button type="submit" variant="gradient" size="large" disabled={loading}>
-                
-                
                 {loading ? t('loading') : t('analyze_btn')}
               </Button>
           </Stack>
         </form>
 
-        {/* Sección de Resultados: Solo aparece si el backend responde */}
         {result && (
           <Box sx={{ mt: 4 }}>
             <Alert severity={result.compliance_status === 'POSITIVE' ? 'success' : 'error'}>

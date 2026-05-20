@@ -1,9 +1,10 @@
+# app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-
+# Importaciones relativas (¡como lo tenías antes!)
 from .routers import ai_router
-
+from .routers import fiscal_router
 
 app = FastAPI(
     title="CFDI Analyzer API",
@@ -26,6 +27,7 @@ app.add_middleware(
 )
 
 app.include_router(ai_router.router)
+app.include_router(fiscal_router.router)
 
 @app.get("/", tags=["Health Check"])
 def root():
