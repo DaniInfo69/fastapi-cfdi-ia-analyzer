@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from app.services.fiscal_service import FiscalService
+from ..services.fiscal_service import FiscalService
 
 router = APIRouter(
     prefix="/api/v1/fiscal",

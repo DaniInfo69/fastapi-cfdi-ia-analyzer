@@ -1,17 +1,15 @@
-// frontend/src/services/fiscalService.js
 import axios from 'axios';
 
-// Idealmente la URL base debería venir de un archivo .env, 
-// pero la dejamos hardcodeada por ahora para mantenerlo simple.
-const API_URL = 'http://localhost:8000/api/v1/fiscal';
+// Asegúrate de que el puerto (8000) coincida exactamente con el de tu FastAPI
+const API_URL = 'http://localhost:8080/api/v1/fiscal';
 
 export const getFiscalRegimes = async () => {
   try {
     const response = await axios.get(`${API_URL}/regimes`);
-    // El backend devuelve { data: [...] }, así que retornamos la data directamente
+    // Como el backend responde con {"data": [...]}, Axios lo envuelve en response.data
     return response.data.data; 
   } catch (error) {
     console.error("Error al obtener los regímenes fiscales:", error);
-    throw error; // Lanzamos el error para que la vista lo maneje si es necesario
+    throw error;
   }
 };
