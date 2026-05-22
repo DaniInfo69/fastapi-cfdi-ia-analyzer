@@ -72,15 +72,6 @@ const AnalysisPage = () => {
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
-      
-      <Box display="flex" justifyContent="flex-end" gap={2} mb={2}>
-        <Button startIcon={<TranslateIcon />} onClick={toggleLanguage} variant="outlined">
-          {isEnglish ? 'Español' : 'English'}
-        </Button>
-        <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
-          {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-        </IconButton>
-      </Box>
 
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h4" gutterBottom align="center">
