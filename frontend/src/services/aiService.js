@@ -16,3 +16,9 @@ export const analyzeFiscalHealth = async (formData) => {
     throw error;
   }
 };
+
+
+export const getAnalysisHistory = async () => {
+  const response = await axios.get(`${API_URL}/history`);
+  return response.data.data;
+};

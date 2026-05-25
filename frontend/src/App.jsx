@@ -7,9 +7,10 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import TranslateIcon from '@mui/icons-material/Translate';
 import { useTranslation } from 'react-i18next'; // Importamos el hook de idioma
-
+import { BrowserRouter as Router, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import { getDesignTokens } from './theme/AppTheme';
 import AnalysisPage from './pages/AnalysisPage';
+import HistoryPage from './pages/HistoryPage'; // Importamos la nueva página
 import './services/i18n';
 
 export const ColorModeContext = createContext({ toggleColorMode: () => {} });
@@ -40,45 +41,53 @@ export default function App() {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline /> 
-        
-        {/* --- NUEVA BARRA DE NAVEGACIÓN SUPERIOR --- */}
-        <AppBar 
-          position="sticky" 
-          color="inherit" 
-          elevation={1} 
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
-        >
-          <Toolbar>
-            {/* Título de la Aplicación */}
-            <Typography 
-              variant="h6" 
-              component="div" 
-              sx={{ flexGrow: 1, fontWeight: 'bold', color: 'primary.main' }}
-            >
-              CFDI AI Analyzer
-            </Typography>
-
-            {/* Controles Globales (Idioma y Tema) */}
-            <Box display="flex" gap={1}>
-              <Button 
-                startIcon={<TranslateIcon />} 
-                onClick={toggleLanguage} 
-                color="inherit"
+        <Router>
+          <AppBar 
+            position="sticky" 
+            color="inherit" 
+            elevation={1} 
+            sx={{ borderBottom: 1, borderColor: 'divider' }}
+          >
+            <Toolbar>
+              <Typography 
+                variant="h6" 
+                component={RouterLink} 
+                to="/"
+                sx={{ fontWeight: 'bold', color: 'primary.main', textDecoration: 'none' }}
               >
-                {isEnglish ? 'ES' : 'EN'}
-              </Button>
-              
-              <IconButton onClick={colorMode.toggleColorMode} color="inherit">
-                {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-              </IconButton>
-            </Box>
-          </Toolbar>
-        </AppBar>
+                CFDI AI Analyzer
+              </Typography>
 
-        {/* --- CONTENIDO PRINCIPAL --- */}
-        <Box sx={{ minHeight: 'calc(100vh - 64px)', backgroundColor: 'background.default' }}>
-          <AnalysisPage />
-        </Box>
+              {/* ENLACES DE NAVEGACIÓN (NUEVO) */}
+              <Box sx={{ flexGrow: 1, display: 'flex', ml: 4, gap: 2 }}>
+                <Button color="inherit" component={RouterLink} to="/">
+                  Análisis
+                </Button>
+                <Button color="inherit" component={RouterLink} to="/history">
+                  Historial
+                </Button>
+              </Box>
+
+              {/* Controles Globales */}
+              <Box display="flex" gap={1}>
+                <Button startIcon={<TranslateIcon />} onClick={toggleLanguage} color="inherit">
+                  {isEnglish ? 'ES' : 'EN'}
+                </Button>
+                <IconButton onClick={colorMode.toggleColorMode} color="inherit">
+                  {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+                </IconButton>
+              </Box>
+            </Toolbar>
+          </AppBar>
+
+          {/* CONTENIDO PRINCIPAL (RUTAS) */}
+          <Box sx={{ minHeight: 'calc(100vh - 64px)', backgroundColor: 'background.default' }}>
+            <Routes>
+              <Route path="/" element={<AnalysisPage />} />
+              <Route path="/history" element={<HistoryPage />} />
+            </Routes>
+          </Box>
+        </Router>
 
       </ThemeProvider>
     </ColorModeContext.Provider>

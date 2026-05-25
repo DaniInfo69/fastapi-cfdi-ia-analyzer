@@ -2,55 +2,37 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { 
   Container, Paper, Typography, Button, TextField, Stack, 
-  Box, IconButton, Alert, FormControl, InputLabel, Select, MenuItem 
+  Box, IconButton, Alert, FormControl, InputLabel, Select, MenuItem, Chip 
 } from '@mui/material';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
-import TranslateIcon from '@mui/icons-material/Translate';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { useTranslation } from 'react-i18next';
-import { ColorModeContext } from '../App';
-import { useTheme } from '@mui/material/styles';
 import { analyzeFiscalHealth } from '../services/aiService';
 import { getFiscalRegimes } from '../services/fiscalService';
 
 const AnalysisPage = () => {
   const { t, i18n } = useTranslation();
-  const theme = useTheme();
-  const colorMode = useContext(ColorModeContext);
-
-  // --- ESTADOS DEL FORMULARIO ---
+  
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [queriesRemaining, setQueriesRemaining] = useState(null);
   const [fiscalRegimes, setFiscalRegimes] = useState([]);
   const [selectedRegime, setSelectedRegime] = useState('');
 
   const isEnglish = i18n.language === 'en';
-  // Buscamos si el régimen seleccionado en el estado requiere Acta Constitutiva
   const isMoral = fiscalRegimes.find(r => r.id === selectedRegime)?.moral === true;
 
-  // --- CARGA DINÁMICA DESDE EL BACKEND ---
   useEffect(() => {
     const fetchRegimes = async () => {
       try {
-        // 2. Usamos la función importada en lugar de axios directamente
         const regimesData = await getFiscalRegimes(); 
         setFiscalRegimes(regimesData);
       } catch (error) {
-        // Aquí podrías poner una alerta visual si el backend no responde
         console.error("No se pudieron cargar los regímenes fiscales.");
       }
     };
     fetchRegimes();
   }, []);
 
-  // --- LÓGICA DE IDIOMA ---
-  const toggleLanguage = () => {
-    const newLang = isEnglish ? 'es' : 'en';
-    i18n.changeLanguage(newLang);
-  };
-
-  // --- LÓGICA DE ENVÍO AL BACKEND ---
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
@@ -61,27 +43,38 @@ const AnalysisPage = () => {
 
     try {
       const response = await analyzeFiscalHealth(formData);
-      setResult(response.data);
+      // Extraemos la 'data' del nuevo formato del backend
+      setResult(response.data.data);
+      setQueriesRemaining(response.data.queries_remaining);
     } catch (error) {
       console.error("Error analizando documentos:", error);
-      alert('Error de conexión con el backend. Revisa la consola.');
+      alert(error.response?.data?.detail || 'Error de conexión con el backend. Revisa la consola.');
     } finally {
       setLoading(false);
     }
   };
 
+  const getRiskColor = (risk) => {
+    if (risk === 'Bajo') return 'success';
+    if (risk === 'Medio') return 'warning';
+    return 'error';
+  };
+
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
-
-      <Paper elevation={3} sx={{ p: 4 }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
         <Typography variant="h4" gutterBottom align="center">
-          {t('title')}
+          {t('title', 'Nuevo Análisis Fiscal')}
         </Typography>
+
+        {queriesRemaining !== null && (
+          <Alert severity="info" sx={{ mb: 3 }}>
+            Análisis gratuitos restantes hoy: <strong>{queriesRemaining}</strong>
+          </Alert>
+        )}
         
         <form onSubmit={handleSubmit}>
           <Stack spacing={3} mt={4}>
-              
-              {/* Selector Dinámico */}
               <FormControl fullWidth required>
                 <InputLabel id="regime-select-label">
                   {t('fiscal_regime', isEnglish ? 'Fiscal Regime' : 'Régimen Fiscal')}
@@ -102,45 +95,56 @@ const AnalysisPage = () => {
               </FormControl>
 
               <Button variant="outlined" component="label" startIcon={<CloudUploadIcon />}>
-                {t('upload_csf')}
+                {t('upload_csf', 'Constancia de Situación Fiscal (PDF)*')}
                 <input name="tax_status_cert" type="file" hidden required accept=".pdf" />
               </Button>
               
               <Button variant="outlined" component="label" startIcon={<CloudUploadIcon />}>
-                {t('upload_opinion')}
+                {t('upload_opinion', 'Opinión de Cumplimiento (PDF)*')}
                 <input name="compliance_opinion" type="file" hidden required accept=".pdf" />
               </Button>
 
               {isMoral && (
                 <Button variant="text" component="label" startIcon={<CloudUploadIcon />}>
-                  {t('bylaws')}
+                  {t('bylaws', 'Acta Constitutiva (PDF Opcional)')}
                   <input name="bylaws" type="file" hidden accept=".pdf" />
                 </Button>
               )}
               
               <TextField 
                 name="general_context" 
-                label={t('general_context', isEnglish ? 'General Context (Employees, location, extra details)' : 'Contexto General (Empleados, ubicación, detalles extra)')} 
+                label={t('general_context', isEnglish ? 'General Context (Employees, location, extra details)' : 'Contexto General del CFDI')} 
                 multiline 
                 rows={4} 
                 fullWidth 
-                placeholder={t('context_placeholder', isEnglish ? 'E.g. Company with 50 employees, located in Mexico City...' : 'Ej. Empresa con 50 empleados, ubicada en CDMX...')}
+                required
+                placeholder={t('context_placeholder', isEnglish ? 'E.g. Purchase of 5 laptops...' : 'Ej. Compra de 5 laptops para desarrolladores...')}
               />
               
               <Button type="submit" variant="gradient" size="large" disabled={loading}>
-                {loading ? t('loading') : t('analyze_btn')}
+                {loading ? t('loading', 'Analizando con IA...') : t('analyze_btn', 'Analizar Deducibilidad')}
               </Button>
           </Stack>
         </form>
 
+        {/* RESULTADO ADAPTADO AL NUEVO JSON */}
         {result && (
-          <Box sx={{ mt: 4 }}>
-            <Alert severity={result.compliance_status === 'POSITIVE' ? 'success' : 'error'}>
-              Status: {result.compliance_status}
-            </Alert>
-            <Typography variant="h6" sx={{ mt: 2 }}>Analysis Summary:</Typography>
-            <Typography variant="body1">{result.entity_summary}</Typography>
-          </Box>
+          <Paper sx={{ mt: 4, p: 3, bgcolor: 'background.default', borderLeft: 6, borderColor: result.deducible === 'Sí' ? 'success.main' : 'error.main' }}>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+              <Typography variant="h5" fontWeight="bold">Veredicto: {result.deducible}</Typography>
+              <Chip label={`Riesgo: ${result.nivel_riesgo}`} color={getRiskColor(result.nivel_riesgo)} />
+            </Box>
+            <Typography variant="body1" paragraph><strong>Resumen:</strong> {result.resumen}</Typography>
+            <Typography variant="body2" color="text.secondary" paragraph><strong>Fundamento:</strong> {result.justificacion_legal}</Typography>
+            
+            {result.advertencias && result.advertencias.length > 0 && (
+              <Alert severity="warning">
+                <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                  {result.advertencias.map((adv, i) => <li key={i}>{adv}</li>)}
+                </ul>
+              </Alert>
+            )}
+          </Paper>
         )}
       </Paper>
     </Container>

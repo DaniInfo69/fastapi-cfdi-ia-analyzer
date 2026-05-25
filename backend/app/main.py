@@ -2,9 +2,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.database import engine, Base
+from app import models
+
 # Importaciones relativas (¡como lo tenías antes!)
 from .routers import ai_router
 from .routers import fiscal_router
+
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="CFDI Analyzer API",
