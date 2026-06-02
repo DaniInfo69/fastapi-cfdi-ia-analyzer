@@ -36,8 +36,11 @@ docker-compose*
 *.swp
 *.swo
 .DS_Store
+cfdi_analyzer.db
+
 
 # Datos temporales
 **/*.db
 **/*.sqlite3
-**/app/Data/       # Por si quedó algún rastro de tu proyecto anterior
+**/app/Data/
+**/cfdi_analyzer.db

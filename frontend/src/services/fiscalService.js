@@ -1,15 +1,11 @@
-import axios from 'axios';
-
-// Asegúrate de que el puerto (8000) coincida exactamente con el de tu FastAPI
-const API_URL = 'http://localhost:8080/api/v1/fiscal';
+import apiClient from './apiClient';
 
 export const getFiscalRegimes = async () => {
   try {
-    const response = await axios.get(`${API_URL}/regimes`);
-    // Como el backend responde con {"data": [...]}, Axios lo envuelve en response.data
+    const response = await apiClient.get('/api/v1/fiscal/regimes');
     return response.data.data; 
   } catch (error) {
-    console.error("Error al obtener los regímenes fiscales:", error);
+    console.error("Error al obtener los regímenes:", error);
     throw error;
   }
 };

@@ -8,6 +8,8 @@ from app import models
 # Importaciones relativas (¡como lo tenías antes!)
 from .routers import ai_router
 from .routers import fiscal_router
+from .routers import user_router
+from .routers import auth_router
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -33,6 +35,8 @@ app.add_middleware(
 
 app.include_router(ai_router.router)
 app.include_router(fiscal_router.router)
+app.include_router(user_router.router)
+app.include_router(auth_router.router)
 
 @app.get("/", tags=["Health Check"])
 def root():

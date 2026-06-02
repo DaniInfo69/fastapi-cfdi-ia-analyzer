@@ -6,7 +6,7 @@ export const getDesignTokens = (mode) => ({
   palette: {
     mode,
     primary: {
-      main: mode === 'light' ? '#159cf6' : '#1186d4', 
+      main: mode === 'light' ? '#159cf6' : '#1186d4',
     },
     background: {
       default: mode === 'light' ? '#f4f3ec' : '#121212',
@@ -23,7 +23,7 @@ export const getDesignTokens = (mode) => ({
     MuiButton: {
       variants: [
         {
-          props: { variant: 'gradient' }, 
+          props: { variant: 'gradient' },
           style: {
             borderRadius: '14px',
             background: 'linear-gradient(45deg, #4b0082 30%, #159cf6 90%)',
@@ -58,7 +58,7 @@ export const getDesignTokens = (mode) => ({
       styleOverrides: {
         root: {
           backgroundColor: mode === 'dark' ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.85)',
-          backdropFilter: 'blur(12px)', 
+          backdropFilter: 'blur(12px)',
           borderRadius: '20px',
         },
       },
@@ -85,6 +85,30 @@ export const getDesignTokens = (mode) => ({
           },
         }
       }
-    }
+    },
+
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: mode === 'dark' ? 'rgba(30, 30, 30, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(16px)',
+          borderRadius: '24px',
+          padding: '16px',
+          boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+          backgroundImage: 'none',
+        },
+      },
+    },
+    
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          fontWeight: 'bold',
+          textTransform: 'none',
+          borderRadius: '12px',
+        }
+      }
+    },
+
   },
 });
