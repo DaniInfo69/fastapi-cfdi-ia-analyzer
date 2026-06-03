@@ -20,6 +20,49 @@ export const getDesignTokens = (mode) => ({
     fontFamily: 'system-ui, "Segoe UI", Roboto, sans-serif',
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        '.login-wrapper': {
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          /* Descuenta con exactitud los 64px del AppBar y los 48px del padding (py:3) en App.jsx */
+          minHeight: 'calc(100vh - 112px)', 
+          padding: '0 16px',
+        },
+        '.login-card': {
+          maxWidth: '420px',
+          width: '100%',
+          /* El fondo blur y borde curvo ya los hereda automáticamente de tu configuración de MuiPaper abajo */
+        },
+        '.login-card-content': {
+          padding: '32px !important', /* Equivale a tu anterior sx={{ p: 4 }} */
+        },
+        '.login-subtitle': {
+          marginBottom: '32px', /* Equivale a tu anterior sx={{ mb: 4 }} */
+        },
+        // NUEVO: Fila que agrupa el checkbox y el link
+        '.login-options-row': {
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: '-8px', // Acercamos los elementos un poco a la contraseña
+          marginBottom: '-8px',
+        },
+        // NUEVO: Link de Olvidar contraseña estilizado
+        '.forgot-password-link': {
+          textDecoration: 'none',
+          fontWeight: 'bold',
+          fontSize: '0.875rem',
+          color: mode === 'light' ? '#159cf6' : '#1186d4',
+          transition: 'color 0.3s ease',
+          '&:hover': {
+            color: mode === 'light' ? '#0d85d8' : '#3ec1fd',
+            textDecoration: 'underline',
+          }
+        }
+      }
+    },
     MuiButton: {
       variants: [
         {
@@ -42,6 +85,27 @@ export const getDesignTokens = (mode) => ({
               background: 'rgba(255, 255, 255, 0.1)',
               color: 'gray',
               boxShadow: 'none',
+            }
+          },
+        },
+        {
+          props: { variant: 'flat' },
+          style: {
+            borderRadius: '14px',
+            backgroundColor: mode === 'light' ? '#159cf6' : '#1186d4',
+            color: '#ffffff',
+            boxShadow: 'none',
+            padding: '12px 32px',
+            textTransform: 'uppercase',
+            fontWeight: 'bold',
+            transition: 'background-color 0.3s ease',
+            '&:hover': {
+              backgroundColor: mode === 'light' ? '#0d85d8' : '#0e70b0',
+              boxShadow: 'none',
+            },
+            '&.Mui-disabled': {
+              backgroundColor: mode === 'light' ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.12)',
+              color: mode === 'light' ? 'rgba(0, 0, 0, 0.26)' : 'rgba(255, 255, 255, 0.3)',
             }
           },
         },
