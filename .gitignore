@@ -62,8 +62,8 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-.db
-backend/app/cfdi_analyzer.db
+*.db
+backend/cfdi_analyzer.db
 
 # Flask stuff:
 instance/
