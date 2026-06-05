@@ -31,7 +31,7 @@ const LoginPage = () => {
       const response = await apiClient.post('/api/v1/auth/login', params, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
-      
+
       login(response.data, rememberMe);
       navigate('/');
     } catch (err) {
@@ -42,9 +42,26 @@ const LoginPage = () => {
   };
 
   return (
-    <Box className="login-wrapper">
-      <Card className="login-card" elevation={3}>
-        <CardContent className="login-card-content">
+    <Box
+      className="login-wrapper"
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '80vh',
+        px: { xs: 2, sm: 0 } // Margen lateral en móviles
+      }}
+    >
+      <Card
+        className="login-card"
+        elevation={3}
+        sx={{
+          width: '100%',
+          maxWidth: 400, // Ancho máximo en escritorio
+          borderRadius: 3
+        }}
+      >
+        <CardContent className="login-card-content" sx={{ p: { xs: 3, sm: 4 } }}>
           <Typography variant="h5" align="center" fontWeight="bold" gutterBottom color="primary.main">
             CFDI AI Analyzer
           </Typography>
@@ -54,20 +71,20 @@ const LoginPage = () => {
 
           <form onSubmit={handleFormSubmit}>
             <Stack spacing={3}>
-              <TextField 
-                label="Usuario" 
-                variant="outlined" 
-                fullWidth 
-                required 
+              <TextField
+                label="Usuario"
+                variant="outlined"
+                fullWidth
+                required
                 value={usernameInput}
                 onChange={(e) => setUsernameInput(e.target.value)}
               />
-              <TextField 
-                label="Contraseña" 
-                type="password" 
-                variant="outlined" 
-                fullWidth 
-                required 
+              <TextField
+                label="Contraseña"
+                type="password"
+                variant="outlined"
+                fullWidth
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -76,9 +93,9 @@ const LoginPage = () => {
               <Box className="login-options-row">
                 <FormControlLabel
                   control={
-                    <Checkbox 
-                      checked={rememberMe} 
-                      onChange={(e) => setRememberMe(e.target.checked)} 
+                    <Checkbox
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
                       color="primary"
                     />
                   }
@@ -91,11 +108,11 @@ const LoginPage = () => {
 
               {error && <Alert severity="error">{error}</Alert>}
 
-              <Button 
-                type="submit" 
-                variant="flat" 
-                fullWidth 
-                size="large" 
+              <Button
+                type="submit"
+                variant="flat"
+                fullWidth
+                size="large"
                 disabled={loading}
               >
                 {loading ? 'Verificando...' : 'Ingresar'}

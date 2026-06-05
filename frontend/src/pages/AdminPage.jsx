@@ -32,12 +32,13 @@ const AdminPage = () => {
   };
 
   return (
-    <Box maxW={600} mx="auto" mt={5} px={2}>
+    <Box maxWidth={600} mx="auto" mt={{ xs: 2, sm: 5 }} px={{ xs: 2, sm: 3 }}>
       <Card sx={{ borderRadius: 3 }}>
-        <CardContent sx={{ p: 4 }}>
-          <Typography variant="h5" fontWeight="bold" gutterBottom>
+        <CardContent sx={{ p: { xs: 2, sm: 4 } }}>
+          <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ fontSize: { xs: '1.5rem', sm: '1.75rem' } }}>
             Panel de Administración
           </Typography>
+          {/* ... el resto del formulario ... */}
           <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
             Registra nuevos usuarios autorizados en el sistema.
           </Typography>

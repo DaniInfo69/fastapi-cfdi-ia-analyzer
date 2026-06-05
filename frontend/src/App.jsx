@@ -42,34 +42,40 @@ const NavigationBar = () => {
         backgroundColor: theme.palette.mode === 'dark' ? 'rgba(18,18,18,0.8)' : 'rgba(244,243,236,0.8)' 
       }}
     >
-      <Toolbar>
+      <Toolbar sx={{ flexWrap: 'wrap', justifyContent: 'space-between' }}>
+        
+        {/* Título (Se adapta en móvil) */}
         <Typography 
           variant="h6" 
           component={token ? RouterLink : Box} 
           to={token ? "/" : undefined}
-          sx={{ fontWeight: 'bold', color: 'primary.main', textDecoration: 'none', cursor: token ? 'pointer' : 'default' }}
+          sx={{ 
+            fontWeight: 'bold', color: 'primary.main', textDecoration: 'none', cursor: token ? 'pointer' : 'default',
+            fontSize: { xs: '1rem', sm: '1.25rem' }, // Más pequeño en móviles
+            mb: { xs: 1, sm: 0 } // Margen inferior en móviles si hace salto de línea
+          }}
         >
           CFDI AI Analyzer
         </Typography>
 
-        {/* Solo se muestran los botones si hay sesión activa */}
-        <Box sx={{ flexGrow: 1, display: 'flex', ml: 4, gap: 2 }}>
-          {token && (
-            <>
-              <Button color="inherit" component={RouterLink} to="/">Análisis</Button>
-              <Button color="inherit" component={RouterLink} to="/history">Historial</Button>
-              {role === 'admin' && (
-                <Button startIcon={<AdminPanelSettingsIcon />} color="secondary" component={RouterLink} to="/admin">
-                  Admin
-                </Button>
-              )}
-            </>
-          )}
-        </Box>
+        {/* Botones de navegación (Se encogen los márgenes en móvil) */}
+        {token && (
+          <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 2 }, flexGrow: 1, justifyContent: { xs: 'flex-start', sm: 'center' } }}>
+            <Button size="small" color="inherit" component={RouterLink} to="/">Análisis</Button>
+            <Button size="small" color="inherit" component={RouterLink} to="/history">Historial</Button>
+            {role === 'admin' && (
+              <Button size="small" startIcon={<AdminPanelSettingsIcon sx={{ display: { xs: 'none', sm: 'block' } }} />} color="secondary" component={RouterLink} to="/admin">
+                Admin
+              </Button>
+            )}
+          </Box>
+        )}
 
-        <Box display="flex" gap={1} alignItems="center">
+        {/* Controles de Idioma, Tema y Usuario */}
+        <Box display="flex" gap={0.5} alignItems="center" sx={{ ml: 'auto' }}>
           {token && (
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ mr: 2, display: { xs: 'none', sm: 'flex' } }}>
+             // El nombre de usuario y rol desaparecen en pantallas muy pequeñas (xs) para ahorrar espacio
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mr: 1, display: { xs: 'none', md: 'flex' } }}>
               <Typography variant="body2" fontWeight="bold">
                 {username}
               </Typography>
@@ -77,16 +83,16 @@ const NavigationBar = () => {
             </Stack>
           )}
 
-          <Button startIcon={<TranslateIcon />} onClick={toggleLanguage} color="inherit">
+          <Button size="small" onClick={toggleLanguage} color="inherit" sx={{ minWidth: 'auto' }}>
             {isEnglish ? 'ES' : 'EN'}
           </Button>
-          <IconButton onClick={colorMode.toggleColorMode} color="inherit">
+          <IconButton size="small" onClick={colorMode.toggleColorMode} color="inherit">
             {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
           </IconButton>
           
           {token && (
             <Tooltip title="Cerrar Sesión">
-              <IconButton onClick={logout} color="error" sx={{ ml: 1 }}>
+              <IconButton size="small" onClick={logout} color="error" sx={{ ml: 0.5 }}>
                 <LogoutIcon />
               </IconButton>
             </Tooltip>

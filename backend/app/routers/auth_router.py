@@ -19,6 +19,9 @@ class UserCreate(BaseModel):
     password: str
     role: str = "cliente" # Por defecto se crean clientes
 
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
 # --- DEPENDENCIA PARA PROTEGER RUTAS ---
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     try:
@@ -85,3 +88,27 @@ async def setup_first_admin(new_admin: UserCreate, db: Session = Depends(get_db)
     db.add(db_user)
     db.commit()
     return {"message": "Primer administrador creado con éxito. Ya puedes iniciar sesión."}
+
+# 4. RENOVAR TOKEN (REFRESH)
+@router.post("/refresh")
+async def refresh_token(request: RefreshTokenRequest, db: Session = Depends(get_db)):
+    try:
+        # Verificamos si el refresh_token es válido
+        payload = jwt.decode(request.refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=401, detail="Refresh token inválido")
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=401, detail="Refresh token expirado. Inicia sesión.")
+        
+    user = db.query(models.User).filter(models.User.username == username).first()
+    if user is None:
+        raise HTTPException(status_code=401, detail="Usuario no encontrado")
+
+    # Si todo está bien, le fabricamos un nuevo Access Token de 15 minutos
+    new_access_token = AuthService.create_access_token(data={"sub": user.username, "role": user.role})
+    
+    return {
+        "access_token": new_access_token,
+        "token_type": "bearer"
+    }

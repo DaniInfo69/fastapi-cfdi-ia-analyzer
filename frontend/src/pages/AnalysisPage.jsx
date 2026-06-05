@@ -129,9 +129,11 @@ const AnalysisPage = () => {
 
         {/* RESULTADO ADAPTADO AL NUEVO JSON */}
         {result && (
-          <Paper sx={{ mt: 4, p: 3, bgcolor: 'background.default', borderLeft: 6, borderColor: result.deducible === 'Sí' ? 'success.main' : 'error.main' }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <Typography variant="h5" fontWeight="bold">Veredicto: {result.deducible}</Typography>
+          <Paper sx={{ mt: 4, p: { xs: 2, sm: 3 }, bgcolor: 'background.default', borderLeft: 6, borderColor: result.deducible === 'Sí' ? 'success.main' : 'error.main' }}>
+            <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} mb={2} gap={1}>
+              <Typography variant="h5" fontWeight="bold" sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+                Veredicto: {result.deducible}
+              </Typography>
               <Chip label={`Riesgo: ${result.nivel_riesgo}`} color={getRiskColor(result.nivel_riesgo)} />
             </Box>
             <Typography variant="body1" paragraph><strong>Resumen:</strong> {result.resumen}</Typography>
