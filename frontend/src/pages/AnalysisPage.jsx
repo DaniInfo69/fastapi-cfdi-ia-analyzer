@@ -1,10 +1,11 @@
 // src/pages/AnalysisPage.jsx
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Container, Paper, Typography, Button, TextField, Stack, 
-  Box, IconButton, Alert, FormControl, InputLabel, Select, MenuItem, Chip 
+  Box, Alert, FormControl, InputLabel, Select, MenuItem, Chip 
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import DescriptionIcon from '@mui/icons-material/Description';
 import { useTranslation } from 'react-i18next';
 import { analyzeFiscalHealth } from '../services/aiService';
 import { getFiscalRegimes } from '../services/fiscalService';
@@ -17,6 +18,10 @@ const AnalysisPage = () => {
   const [queriesRemaining, setQueriesRemaining] = useState(null);
   const [fiscalRegimes, setFiscalRegimes] = useState([]);
   const [selectedRegime, setSelectedRegime] = useState('');
+  const [fileNames, setFileNames] = useState({});
+  
+  // NUEVO: Estado para manejar errores de validación del formulario
+  const [formError, setFormError] = useState(null);
 
   const isEnglish = i18n.language === 'en';
   const isMoral = fiscalRegimes.find(r => r.id === selectedRegime)?.moral === true;
@@ -33,8 +38,32 @@ const AnalysisPage = () => {
     fetchRegimes();
   }, []);
 
+  const handleFileChange = (event) => {
+    const { name, files } = event.target;
+    if (files && files.length > 0) {
+      setFileNames((prev) => ({ ...prev, [name]: files[0].name }));
+      // Si el usuario sube el archivo, limpiamos el error
+      setFormError(null);
+    } else {
+      setFileNames((prev) => ({ ...prev, [name]: null }));
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setFormError(null); // Reiniciamos el error en cada intento
+
+    // VALIDACIÓN MANUAL: Verificamos los archivos obligatorios
+    if (!fileNames.tax_status_cert) {
+      setFormError(isEnglish ? "Tax Status Certificate (PDF) is required." : "La Constancia de Situación Fiscal (PDF) es obligatoria.");
+      return; // Detenemos la ejecución
+    }
+    
+    if (!fileNames.cfdi) {
+      setFormError(isEnglish ? "CFDI / Invoice is required." : "La Factura / CFDI (XML o PDF) es obligatoria.");
+      return; // Detenemos la ejecución
+    }
+
     setLoading(true);
     setResult(null);
 
@@ -43,7 +72,6 @@ const AnalysisPage = () => {
 
     try {
       const response = await analyzeFiscalHealth(formData);
-      // Extraemos la 'data' del nuevo formato del backend
       setResult(response.data.data);
       setQueriesRemaining(response.data.queries_remaining);
     } catch (error) {
@@ -72,10 +100,17 @@ const AnalysisPage = () => {
             Análisis gratuitos restantes hoy: <strong>{queriesRemaining}</strong>
           </Alert>
         )}
+
+        {/* NUEVO: Alerta de error si faltan archivos obligatorios */}
+        {formError && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {formError}
+          </Alert>
+        )}
         
         <form onSubmit={handleSubmit}>
-          <Stack spacing={3} mt={4}>
-              <FormControl fullWidth required>
+          <Stack spacing={3} mt={2}>
+              <FormControl required className="regime-form-control">
                 <InputLabel id="regime-select-label">
                   {t('fiscal_regime', isEnglish ? 'Fiscal Regime' : 'Régimen Fiscal')}
                 </InputLabel>
@@ -94,22 +129,65 @@ const AnalysisPage = () => {
                 </Select>
               </FormControl>
 
-              <Button variant="outlined" component="label" startIcon={<CloudUploadIcon />}>
-                {t('upload_csf', 'Constancia de Situación Fiscal (PDF)*')}
-                <input name="tax_status_cert" type="file" hidden required accept=".pdf" />
-              </Button>
-              
-              <Button variant="outlined" component="label" startIcon={<CloudUploadIcon />}>
-                {t('upload_opinion', 'Opinión de Cumplimiento (PDF)*')}
-                <input name="compliance_opinion" type="file" hidden required accept=".pdf" />
-              </Button>
+              <Box className="file-buttons-grid">
+                {/* Botón 1: Constancia (OBLIGATORIA) */}
+                {/* Nota: Quitamos el "required" nativo del input oculto para evitar fallos del navegador */}
+                <Box className="file-upload-wrapper">
+                  <Button variant="outlined" size="small" component="label" startIcon={<CloudUploadIcon />}>
+                    {t('upload_csf', 'Constancia (PDF)*')}
+                    <input name="tax_status_cert" type="file" hidden accept=".pdf" onChange={handleFileChange} />
+                  </Button>
+                  {fileNames.tax_status_cert && (
+                    <Box className="file-preview-badge">
+                      <DescriptionIcon fontSize="small" /> {fileNames.tax_status_cert}
+                    </Box>
+                  )}
+                </Box>
+                
+                {/* Botón 2: Opinión de Cumplimiento (AHORA OPCIONAL) */}
+                <Box className="file-upload-wrapper">
+                  <Button variant="outlined" size="small" component="label" startIcon={<CloudUploadIcon />}>
+                    {t('upload_opinion', 'Opinión Cumplimiento (Opcional)')}
+                    <input name="compliance_opinion" type="file" hidden accept=".pdf" onChange={handleFileChange} />
+                  </Button>
+                  {fileNames.compliance_opinion && (
+                    <Box className="file-preview-badge">
+                      <DescriptionIcon fontSize="small" /> {fileNames.compliance_opinion}
+                    </Box>
+                  )}
+                </Box>
 
-              {isMoral && (
-                <Button variant="text" component="label" startIcon={<CloudUploadIcon />}>
-                  {t('bylaws', 'Acta Constitutiva (PDF Opcional)')}
-                  <input name="bylaws" type="file" hidden accept=".pdf" />
-                </Button>
-              )}
+                {/* Botón 3: Acta Constitutiva (Opcional - Personas Morales) */}
+                {isMoral && (
+                  <Box className="file-upload-wrapper">
+                    <Button variant="outlined" size="small" component="label" startIcon={<CloudUploadIcon />}>
+                      {t('bylaws', 'Acta Constitutiva (Opcional)')}
+                      <input name="bylaws" type="file" hidden accept=".pdf" onChange={handleFileChange} />
+                    </Button>
+                    {fileNames.bylaws && (
+                      <Box className="file-preview-badge">
+                        <DescriptionIcon fontSize="small" /> {fileNames.bylaws}
+                      </Box>
+                    )}
+                  </Box>
+                )}
+
+                {/* Botón 4: CFDI Factura (OBLIGATORIA - ESTIRA A 2 COLUMNAS SI NO HAY ACTA) */}
+                <Box 
+                  className="file-upload-wrapper" 
+                  sx={{ gridColumn: { sm: isMoral ? 'auto' : 'span 2' } }}
+                >
+                  <Button variant="outlined" size="small" component="label" startIcon={<CloudUploadIcon />}>
+                    {t('upload_cfdi', 'Factura / CFDI (XML o PDF)*')}
+                    <input name="cfdi" type="file" hidden accept=".xml,.pdf" onChange={handleFileChange} />
+                  </Button>
+                  {fileNames.cfdi && (
+                    <Box className="file-preview-badge">
+                      <DescriptionIcon fontSize="small" /> {fileNames.cfdi}
+                    </Box>
+                  )}
+                </Box>
+              </Box>
               
               <TextField 
                 name="general_context" 
@@ -127,7 +205,6 @@ const AnalysisPage = () => {
           </Stack>
         </form>
 
-        {/* RESULTADO ADAPTADO AL NUEVO JSON */}
         {result && (
           <Paper sx={{ mt: 4, p: { xs: 2, sm: 3 }, bgcolor: 'background.default', borderLeft: 6, borderColor: result.deducible === 'Sí' ? 'success.main' : 'error.main' }}>
             <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} mb={2} gap={1}>

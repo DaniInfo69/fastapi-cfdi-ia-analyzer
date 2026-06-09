@@ -1,7 +1,6 @@
+// src/theme/AppTheme.js
 import { createTheme } from '@mui/material/styles';
-import { Component } from 'react';
 
-// Exportamos getDesignTokens para que App.jsx pueda inyectarle 'light' o 'dark'
 export const getDesignTokens = (mode) => ({
   palette: {
     mode,
@@ -26,30 +25,26 @@ export const getDesignTokens = (mode) => ({
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          /* Descuenta con exactitud los 64px del AppBar y los 48px del padding (py:3) en App.jsx */
           minHeight: 'calc(100vh - 112px)', 
           padding: '0 16px',
         },
         '.login-card': {
           maxWidth: '420px',
           width: '100%',
-          /* El fondo blur y borde curvo ya los hereda automáticamente de tu configuración de MuiPaper abajo */
         },
         '.login-card-content': {
-          padding: '32px !important', /* Equivale a tu anterior sx={{ p: 4 }} */
+          padding: '32px !important',
         },
         '.login-subtitle': {
-          marginBottom: '32px', /* Equivale a tu anterior sx={{ mb: 4 }} */
+          marginBottom: '32px',
         },
-        // NUEVO: Fila que agrupa el checkbox y el link
         '.login-options-row': {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginTop: '-8px', // Acercamos los elementos un poco a la contraseña
+          marginTop: '-8px',
           marginBottom: '-8px',
         },
-        // NUEVO: Link de Olvidar contraseña estilizado
         '.forgot-password-link': {
           textDecoration: 'none',
           fontWeight: 'bold',
@@ -60,6 +55,45 @@ export const getDesignTokens = (mode) => ({
             color: mode === 'light' ? '#0d85d8' : '#3ec1fd',
             textDecoration: 'underline',
           }
+        },
+        // NUEVO: Clase para controlar el ancho del selector de régimen
+        '.regime-form-control': {
+          maxWidth: '460px',
+          width: '100%',
+          alignSelf: 'center', // Evita que se estire al 100% del contenedor en flexbox
+        },
+        // NUEVO: Cuadrícula responsiva para agrupar los botones de archivos de 2 en 2
+        '.file-buttons-grid': {
+          display: 'grid',
+          gridTemplateColumns: '1fr',
+          gap: '16px',
+          width: '100%',
+          '@media (min-width: 600px)': {
+            gridTemplateColumns: '1fr 1fr', // 2 columnas uniformes en pantallas medianas/grandes
+          }
+        },
+        '.file-upload-wrapper': {
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          width: '100%',
+        },
+        '.file-preview-badge': {
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '0.875rem',
+          color: mode === 'light' ? '#1e4620' : '#81c784',
+          backgroundColor: mode === 'light' ? '#edf7ed' : 'rgba(129, 199, 132, 0.1)',
+          padding: '8px 12px',
+          borderRadius: '8px',
+          fontWeight: '500',
+          border: `1px solid ${mode === 'light' ? '#c8e6c9' : 'rgba(129, 199, 132, 0.3)'}`,
+          animation: 'fadeIn 0.3s ease-in-out',
+        },
+        '@keyframes fadeIn': {
+          from: { opacity: 0, transform: 'translateY(-5px)' },
+          to: { opacity: 1, transform: 'translateY(0)' },
         }
       }
     },
@@ -127,7 +161,6 @@ export const getDesignTokens = (mode) => ({
         },
       },
     },
-    // Centralizamos el estilo para que aplique a TextField y a Select
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
@@ -135,7 +168,6 @@ export const getDesignTokens = (mode) => ({
         },
       },
     },
-    // Estilos para el menú del selector
     MuiMenuItem: {
       styleOverrides: {
         root: {
@@ -150,7 +182,6 @@ export const getDesignTokens = (mode) => ({
         }
       }
     },
-
     MuiDialog: {
       styleOverrides: {
         paper: {
@@ -163,7 +194,6 @@ export const getDesignTokens = (mode) => ({
         },
       },
     },
-    
     MuiTab: {
       styleOverrides: {
         root: {
@@ -173,6 +203,5 @@ export const getDesignTokens = (mode) => ({
         }
       }
     },
-
   },
 });
