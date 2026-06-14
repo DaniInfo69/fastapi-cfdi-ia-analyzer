@@ -23,10 +23,10 @@ class AnalysisHistory(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     
     fiscal_regime = Column(String(100))
-    nivel_riesgo = Column(String(20))
-    deducible = Column(String(50))
-    resumen = Column(Text)
-    justificacion_legal = Column(Text)
+    risk_level = Column(String, default="Unknown")
+    deductible = Column(String, default="Unknown")
+    summary = Column(Text, default="")
+    legal_justification = Column(Text, default="")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     owner = relationship("User", back_populates="analyses")

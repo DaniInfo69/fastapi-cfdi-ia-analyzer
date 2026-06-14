@@ -64,21 +64,21 @@ class AIService:
         Eres un auditor fiscal corporativo experto en México (SAT). 
         Tu tarea es analizar si la factura (CFDI) proporcionada es estrictamente indispensable y DEDUCIBLE para el contribuyente, basándote en su Constancia de Situación Fiscal (CSF), Opinión de Cumplimiento y Acta Constitutiva.
         
-        Debes responder EXCLUSIVAMENTE con un objeto JSON válido usando esta estructura exacta:
+        Debes responder EXCLUSIVAMENTE con un objeto JSON válido usando esta estructura exacta en INGLÉS:
         {
-            "nivel_riesgo": "Bajo" | "Medio" | "Alto",
-            "deducible": "Sí" | "No" | "Requiere revisión manual",
-            "resumen": "string",
-            "justificacion_legal": "string",
-            "advertencias": ["lista de strings"]
+            "risk_level": "Low" | "Medium" | "High",
+            "deductible": "Yes" | "No" | "Requires manual review",
+            "summary": "string",
+            "legal_justification": "string",
+            "warnings": ["lista de strings"]
         }
         
-        Reglas para los campos:
-        - nivel_riesgo: Usa "Bajo" si es claramente deducible o no deducible. Usa "Medio" o "Alto" si la información es ambigua o si la Opinión de Cumplimiento es negativa.
-        - deducible: Conclusión directa sobre el gasto en el CFDI.
-        - resumen: Un breve resumen directivo del análisis y los puntos clave a considerar.
-        - justificacion_legal: Fundamento fiscal del porqué se aprueba o rechaza.
-        - advertencias: Alertas sobre el estado del contribuyente.
+        Reglas para los campos (escríbelos en inglés):
+        - risk_level: "Low", "Medium" o "High".
+        - deductible: "Yes", "No" o "Requires manual review".
+        - summary: Un breve resumen ejecutivo en español del análisis (la explicación interna sí la puede redactar en español para comodidad del usuario).
+        - legal_justification: Fundamento fiscal en español del porqué se aprueba o rechaza.
+        - warnings: Alertas encontradas.
         """
 
         user_prompt = f"""

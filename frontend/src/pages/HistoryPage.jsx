@@ -1,19 +1,22 @@
 // src/pages/HistoryPage.jsx
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Container, Paper, Typography, Table, TableBody, TableCell, 
   TableContainer, TableHead, TableRow, Chip 
 } from '@mui/material';
-import { getAnalysisHistory } from '../services/aiService';
+import { apiClient } from '../services/apiClient'; // Ajusta la importación según donde tengas tu servicio
 
 const HistoryPage = () => {
+  const { t } = useTranslation();
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const data = await getAnalysisHistory();
-        setHistory(data);
+        // Asumiendo que tu endpoint de FastAPI devuelve { data: [...] }
+        const response = await apiClient.get('/api/v1/ai/history'); 
+        setHistory(response.data.data || []);
       } catch (error) {
         console.error("Error cargando historial", error);
       }
@@ -21,50 +24,70 @@ const HistoryPage = () => {
     fetchHistory();
   }, []);
 
+  // Modificado para leer los valores en inglés de la base de datos
   const getRiskColor = (risk) => {
-    if (risk === 'Bajo') return 'success';
-    if (risk === 'Medio') return 'warning';
+    if (risk === 'Low') return 'success';
+    if (risk === 'Medium') return 'warning';
     return 'error';
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 1, sm: 2 } }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 1, sm: 2 } }}>
       <Paper elevation={3} sx={{ p: { xs: 2, sm: 4 }, borderRadius: 3, overflowX: 'auto' }}>
         <Typography variant="h4" gutterBottom sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
           Historial de Análisis
         </Typography>
         <Typography variant="body2" color="text.secondary" paragraph>
-          Tus análisis recientes (actualmente vinculados por IP, próximamente por cuenta).
+          Tus análisis recientes vinculados a tu cuenta.
         </Typography>
 
         <TableContainer>
-          <Table size="small">
+          <Table size="small" sx={{ minWidth: 650 }}>
             <TableHead>
               <TableRow>
                 <TableCell><b>Fecha</b></TableCell>
                 <TableCell><b>Régimen</b></TableCell>
-                <TableCell><b>Deducible</b></TableCell>
                 <TableCell><b>Riesgo</b></TableCell>
+                <TableCell><b>Deducible</b></TableCell>
+                <TableCell><b>Resumen</b></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {history.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} align="center">No hay historial disponible aún.</TableCell>
+              {/* Cambiamos 'records' por 'history' */}
+              {history.map((row) => (
+                <TableRow key={row.id}>
+                  {/* Formateamos la fecha para que se vea bonita */}
+                  <TableCell>
+                    {new Date(row.created_at).toLocaleDateString()}
+                  </TableCell>
+                  
+                  <TableCell>{row.fiscal_regime || "No especificado"}</TableCell>
+                  
+                  {/* Usamos el Chip para que el riesgo tenga color */}
+                  <TableCell>
+                    <Chip 
+                      size="small"
+                      label={t(`risk.${row.risk_level}`, { defaultValue: row.risk_level })}
+                      color={getRiskColor(row.risk_level)} 
+                    />
+                  </TableCell>
+          
+                  <TableCell>
+                    {t(`deductible.${row.deductible}`, { defaultValue: row.deductible })}
+                  </TableCell>
+
+                  {/* Mostramos el resumen. Quité la justificación porque haría la tabla inmensa, es mejor dejarla solo en la vista de detalle. */}
+                  <TableCell>{row.summary}</TableCell>
                 </TableRow>
-              ) : (
-                history.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell>{new Date(row.created_at).toLocaleDateString()}</TableCell>
-                    <TableCell>{row.fiscal_regime || 'N/A'}</TableCell>
-                    <TableCell>
-                      <Chip size="small" label={row.deducible} color={row.deducible === 'Sí' ? 'success' : 'error'} />
-                    </TableCell>
-                    <TableCell>
-                      <Chip size="small" label={row.nivel_riesgo} color={getRiskColor(row.nivel_riesgo)} variant="outlined" />
-                    </TableCell>
-                  </TableRow>
-                ))
+              ))}
+              
+              {/* Mensaje por si el historial está vacío */}
+              {history.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                    Aún no tienes análisis en tu historial.
+                  </TableCell>
+                </TableRow>
               )}
             </TableBody>
           </Table>

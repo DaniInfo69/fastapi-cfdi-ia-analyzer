@@ -15,7 +15,21 @@ const resources = {
             "analyze_btn": "Start AI Analysis",
             "loading": "Analyzing documents...",
             "light_mode": "Light",
-            "dark_mode": "Dark"
+            "dark_mode": "Dark",
+            
+            // Textos dinámicos de la Base de Datos
+            "risk": {
+                "Low": "Low",
+                "Medium": "Medium",
+                "High": "High",
+                "Unknown": "Unknown"
+            },
+            "deductible": {
+                "Yes": "Yes",
+                "No": "No",
+                "Requires manual review": "Requires manual review",
+                "Unknown": "Unknown"
+            }
         }
     },
     es: {
@@ -30,7 +44,21 @@ const resources = {
             "analyze_btn": "Iniciar Análisis con IA",
             "loading": "Analizando documentos...",
             "light_mode": "Claro",
-            "dark_mode": "Oscuro"
+            "dark_mode": "Oscuro",
+            
+            // Textos dinámicos de la Base de Datos traducidos
+            "risk": {
+                "Low": "Bajo",
+                "Medium": "Medio",
+                "High": "Alto",
+                "Unknown": "Desconocido"
+            },
+            "deductible": {
+                "Yes": "Sí",
+                "No": "No",
+                "Requires manual review": "Requiere revisión manual",
+                "Unknown": "Desconocido"
+            }
         }
     }
 };
@@ -39,7 +67,7 @@ i18n
     .use(initReactI18next)
     .init({
         resources,
-        lng: "en", // Idioma por defecto
+        lng: "es", // Te sugiero poner "es" por defecto si tu app se usará principalmente en México
         fallbackLng: "en",
         interpolation: { escapeValue: false }
     });

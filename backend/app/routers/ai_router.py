@@ -75,10 +75,10 @@ async def analyze_fiscal_health_endpoint(
         db_record = models.AnalysisHistory(
             user_id=user.id,
             fiscal_regime=fiscal_regime,
-            nivel_riesgo=result.get("nivel_riesgo", "Desconocido"),
-            deducible=result.get("deducible", "Desconocido"),
-            resumen=result.get("resumen", ""),
-            justificacion_legal=result.get("justificacion_legal", "")
+            risk_level=result.get("risk_level", "Unknown"),
+            deductible=result.get("deducible", "Unknown"),
+            summary=result.get("summary", ""),
+            legal_justification=result.get("legal_justification", "")
         )
         db.add(db_record)
         db.commit()
@@ -95,5 +95,3 @@ async def analyze_fiscal_health_endpoint(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error procesando los documentos: {str(e)}")
-
-# ... (Tu código de /history se mantiene igual abajo) ...
