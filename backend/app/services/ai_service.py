@@ -1,6 +1,7 @@
 import io
 import json
 import os
+import re # <-- Importante para limpiar textos
 import PyPDF2
 from openai import OpenAI
 
@@ -13,31 +14,55 @@ class AIService:
             pdf_stream = io.BytesIO(file_bytes)
             reader = PyPDF2.PdfReader(pdf_stream)
             full_text = ""
-            # Limit the number of pages to optimize token usage
             pages_to_read = min(max_pages, len(reader.pages))
             
             for page_num in range(pages_to_read):
-                full_text += reader.pages[page_num].extract_text() + "\n"
+                page_text = reader.pages[page_num].extract_text()
+                if page_text:
+                    full_text += page_text + " "
             
-            return full_text.strip()
+            # OPTIMIZACIÓN DE TOKENS: 
+            # Reemplaza múltiples espacios y saltos de línea por un solo espacio.
+            clean_text = re.sub(r'\s+', ' ', full_text).strip()
+            
+            # VALIDACIÓN DE IMÁGENES:
+            # Una constancia o acta real tiene miles de caracteres. 
+            # Si tiene menos de 50, casi seguro es un documento escaneado (imágenes).
+            if len(clean_text) < 50 and pages_to_read > 0:
+                raise ValueError("El documento parece ser un escaneo o contener solo imágenes. Por favor, sube PDFs con texto seleccionable.")
+                
+            return clean_text
+        except ValueError as ve:
+            raise ve # Pasamos el error específico hacia el router
         except Exception as e:
-            return f"Error reading PDF in memory: {str(e)}"
+            raise Exception(f"Error leyendo el PDF: {str(e)}")
+
+    @staticmethod
+    def process_xml_cfdi(file_bytes: bytes) -> str:
+        """
+        Lee el XML y lo comprime en una sola línea eliminando espacios y saltos.
+        Esto hace que la IA lo lea perfectamente pero gastando muchos menos tokens.
+        """
+        try:
+            xml_text = file_bytes.decode('utf-8')
+            # Limpiamos el XML de espacios innecesarios
+            clean_xml = re.sub(r'\s+', ' ', xml_text).strip()
+            return clean_xml
+        except Exception as e:
+            raise Exception(f"Error procesando el archivo XML: {str(e)}")
 
     @classmethod
     def analyze_fiscal_health(
         cls, 
         tax_status_text: str, 
         compliance_text: str, 
+        cfdi_text: str, # <-- Nuevo parámetro para el CFDI
         bylaws_text: str = "Not provided", 
         additional_context: str = ""
     ):
-        """
-        Envía el texto extraído a OpenAI para analizar si un gasto (CFDI) 
-        es deducible basándose en la salud fiscal y giro de la entidad.
-        """
         system_prompt = """
         Eres un auditor fiscal corporativo experto en México (SAT). 
-        Tu tarea es analizar si un gasto o factura (mencionado en el contexto adicional) es estrictamente indispensable y DEDUCIBLE para el contribuyente, basándote en su Constancia de Situación Fiscal (CSF), Opinión de Cumplimiento y Acta Constitutiva.
+        Tu tarea es analizar si la factura (CFDI) proporcionada es estrictamente indispensable y DEDUCIBLE para el contribuyente, basándote en su Constancia de Situación Fiscal (CSF), Opinión de Cumplimiento y Acta Constitutiva.
         
         Debes responder EXCLUSIVAMENTE con un objeto JSON válido usando esta estructura exacta:
         {
@@ -49,11 +74,11 @@ class AIService:
         }
         
         Reglas para los campos:
-        - nivel_riesgo: Usa "Bajo" si es claramente deducible o no deducible. Usa "Medio" o "Alto" si la información es ambigua, si el régimen fiscal no concuerda del todo con el gasto, o si la Opinión de Cumplimiento es negativa.
-        - deducible: Conclusión directa sobre el gasto.
+        - nivel_riesgo: Usa "Bajo" si es claramente deducible o no deducible. Usa "Medio" o "Alto" si la información es ambigua o si la Opinión de Cumplimiento es negativa.
+        - deducible: Conclusión directa sobre el gasto en el CFDI.
         - resumen: Un breve resumen directivo del análisis y los puntos clave a considerar.
-        - justificacion_legal: Fundamento fiscal o de negocio del porqué se aprueba o rechaza (ej. "No es estrictamente indispensable para el giro descrito en el Acta Constitutiva").
-        - advertencias: Alertas sobre el estado del contribuyente (ej. "La opinión de cumplimiento es negativa, no se pueden deducir gastos").
+        - justificacion_legal: Fundamento fiscal del porqué se aprueba o rechaza.
+        - advertencias: Alertas sobre el estado del contribuyente.
         """
 
         user_prompt = f"""
@@ -66,7 +91,10 @@ class AIService:
         --- BYLAWS / CONSTITUTIONAL ACT ---
         {bylaws_text}
 
-        --- CONTEXTO ADICIONAL (DETALLES DEL GASTO / CFDI) ---
+        --- CFDI A ANALIZAR (FACTURA XML) ---
+        {cfdi_text}
+
+        --- CONTEXTO ADICIONAL ---
         {additional_context}
         """
 
@@ -77,7 +105,7 @@ class AIService:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            temperature=0.2 # To reduce randomness in the response.
+            temperature=0.2 
         )
         
         return json.loads(response.choices[0].message.content)

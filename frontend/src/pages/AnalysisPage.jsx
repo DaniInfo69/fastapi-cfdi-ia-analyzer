@@ -51,7 +51,7 @@ const AnalysisPage = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setFormError(null); // Reiniciamos el error en cada intento
+    setFormError(""); // Reiniciamos el error en cada intento
 
     // VALIDACIÓN MANUAL: Verificamos los archivos obligatorios
     if (!fileNames.tax_status_cert) {
@@ -63,20 +63,26 @@ const AnalysisPage = () => {
       setFormError(isEnglish ? "CFDI / Invoice is required." : "La Factura / CFDI (XML o PDF) es obligatoria.");
       return; // Detenemos la ejecución
     }
-
+    
     setLoading(true);
     setResult(null);
+    setIsLoading(true);
 
     const formData = new FormData(event.currentTarget);
     formData.append('fiscal_regime', selectedRegime); 
 
     try {
       const response = await analyzeFiscalHealth(formData);
+      const result = await aiService.analyze(formData);
       setResult(response.data.data);
       setQueriesRemaining(response.data.queries_remaining);
     } catch (error) {
-      console.error("Error analizando documentos:", error);
-      alert(error.response?.data?.detail || 'Error de conexión con el backend. Revisa la consola.');
+      if (error.response && error.response.data && error.response.data.detail) {
+        // Si el backend mandó un HTTPException
+        setFormError(error.response.data.detail);
+      } else {
+        setFormError("Ocurrió un error inesperado al comunicarse con el servidor. Revisa tu conexión.");
+      }
     } finally {
       setLoading(false);
     }
@@ -101,7 +107,6 @@ const AnalysisPage = () => {
           </Alert>
         )}
 
-        {/* NUEVO: Alerta de error si faltan archivos obligatorios */}
         {formError && (
           <Alert severity="error" sx={{ mb: 3 }}>
             {formError}
