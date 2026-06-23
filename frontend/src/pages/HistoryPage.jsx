@@ -5,7 +5,7 @@ import {
   Container, Paper, Typography, Table, TableBody, TableCell, 
   TableContainer, TableHead, TableRow, Chip 
 } from '@mui/material';
-import { apiClient } from '../services/apiClient'; // Ajusta la importación según donde tengas tu servicio
+import { getAnalysisHistory } from '../services/aiService';
 
 const HistoryPage = () => {
   const { t } = useTranslation();
@@ -14,9 +14,9 @@ const HistoryPage = () => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        // Asumiendo que tu endpoint de FastAPI devuelve { data: [...] }
-        const response = await apiClient.get('/api/v1/ai/history'); 
-        setHistory(response.data.data || []);
+        // Usamos tu servicio limpio
+        const data = await getAnalysisHistory(); 
+        setHistory(data || []);
       } catch (error) {
         console.error("Error cargando historial", error);
       }
