@@ -24,11 +24,14 @@ ejemplo:
     * docker compose up --build
 
 ### 3. Acceder al frontend
+
     * En el navegador de tu preferencia, escribe o pega la siguiente URL: http://localhost:3000/
     * Para poder ingresar por primera vez como administrador, introduce las siguientes credenciales en el formulario de inicio de sesión:
-     ```
+    
+    ```
     Usuario: usuarioAdmin
     Contraseña: admin123
+
 
 ## Documetación de la API:
 Después de ejecutar el contenedor, puedes ingresar a esta URL en el navegador para ver la documentación interactiva:
